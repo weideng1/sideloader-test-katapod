@@ -9,3 +9,5 @@ ssh -i ~/.ssh/vm_key ubuntu@<VM_public_ip>
 ssh -i ~/.ssh/vm_key -L 8080:localhost:8080 ubuntu@<VM_public_ip>
 ```
 
+Then you can use your browser to access localhost:8080 for the main interactive experience of SSTable Sideloader.
+
