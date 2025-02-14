@@ -1,0 +1,21 @@
+{
+  "layout": {
+    "terminals": [
+      {
+        "id": "host",
+        "name": "host-console"
+      }
+    ]
+  },
+  "navigation": {
+    "onLoadCommands": {
+      "intro": {
+        "host": [
+          {
+            "command": "/workspace/sideloader-test-katapod/scenario_scripts/finalize_origin.sh && /workspace/sideloader-test-katapod/scenario_scripts/update_astradb_name_in_all_md.sh"
+          }
+        ]
+      }
+    }
+  }
+}

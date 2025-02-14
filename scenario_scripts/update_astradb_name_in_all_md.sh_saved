@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Prompt user for the Astra DB name
+read -p "Enter your Astra DB name: " ASTRA_DB_NAME
+
+# Validate input
+if [[ -z "$ASTRA_DB_NAME" ]]; then
+    echo "Error: Astra DB name cannot be empty."
+    exit 1
+fi
+
+# Find and replace all occurrences in *.md files
+find . -type f -name "*.md" -exec sed -i "s|astra db cqlsh [^ ]*|astra db cqlsh $ASTRA_DB_NAME|g" {} +
+
+echo "Replacement complete. Updated 'astra db cqlsh' references with '$ASTRA_DB_NAME' in all *.md files."
