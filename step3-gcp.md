@@ -11,7 +11,7 @@
  <a title="Back" href='command:katapod.loadPage?[{"step":"step2"}]' 
    class="btn btn-dark navigation-top-left">⬅️ Back
  </a>
-<span class="step-count">Step 3 (AWS)</span>
+<span class="step-count">Step 3 (GCP)</span>
  <a title="Next" href='command:katapod.loadPage?[{"step":"step4"}]' 
     class="btn btn-dark navigation-top-right">Next ➡️
   </a>
@@ -105,36 +105,37 @@ curl -s -X GET \
     https://api.astra.datastax.com/v2/databases/${ASTRA_DB_ID}/migrations/${MIGRATION_ID} \
     | jq . > init_complete_output.json
 export MIGRATION_DIR=$(jq '.uploadBucketDir' init_complete_output.json | tr -d '"')
-export ACCESS_KEY_ID=$(jq '.uploadCredentials.keys.accessKeyID' init_complete_output.json | tr -d '"')
-export SECRET_ACCESS_KEY=$(jq '.uploadCredentials.keys.secretAccessKey' init_complete_output.json | tr -d '"')
-export SESSION_TOKEN=$(jq '.uploadCredentials.keys.sessionToken' init_complete_output.json | tr -d '"')
+export GCP_CREDENTIAL=$(jq '.uploadCredentials.keys.file' init_complete_output.json | tr -d '"')
 rm -f init_complete_output.json
 ```
 
-Now you are ready to upload your snapshot to the migration directory. To do so, you will use the AWS CLI that is pre-installed on your Origin node. Remember that your Origin node runs as a Docker container, so the command below needs to pass the required environment variables from the host to the container.
+Now you are ready to upload your snapshot to the migration directory. To do so, you will use the gsutil tool that is pre-installed on your Origin node. Remember that your Origin node runs as a Docker container, so the command below needs to pass the required environment variables from the host to the container.
 
 Run the following command:
 ```bash
 ### {"terminalId": "host", "backgroundColor": "#C5DDD2"}
 docker exec \
-  -e AWS_ACCESS_KEY_ID=$ACCESS_KEY_ID \
-  -e AWS_SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY \
-  -e AWS_SESSION_TOKEN=$SESSION_TOKEN \
-  -e MIGRATION_DIR=$MIGRATION_DIR \
-  -it cassandra-origin-1 \
-  aws s3 sync --only-show-errors --exclude '*' --include '*/snapshots/data_migration_snapshot*' /var/lib/cassandra/data/ ${MIGRATION_DIR}node1
+  -e MIGRATION_DIR \
+  -e GCP_CREDENTIAL \
+  -it cassandra-origin-1 bash -c '
+    echo ${GCP_CREDENTIAL} | base64 -d > creds.json
+    /google-cloud-sdk/bin/gcloud auth activate-service-account --key-file creds.json
+    rm creds.json
+    for dir in $(find /var/lib/cassandra/data/ -type d -path "*/snapshots/data_migration_snapshot*"); do
+      REL_PATH=${dir#"/var/lib/cassandra/data/"}  # Remove the base path
+      /google-cloud-sdk/bin/gsutil -m rsync -r -d "$dir" "${MIGRATION_DIR}node1/$REL_PATH/"
+    done
+  '
 ```
 
 Check that the data has been uploaded correctly to the migration directory:
 ```bash
 ### {"terminalId": "host", "backgroundColor": "#C5DDD2"}
 docker exec \
-  -e AWS_ACCESS_KEY_ID=$ACCESS_KEY_ID \
-  -e AWS_SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY \
-  -e AWS_SESSION_TOKEN=$SESSION_TOKEN \
-  -e MIGRATION_DIR=$MIGRATION_DIR \
+  -e MIGRATION_DIR \
+  -e GCP_CREDENTIAL \
   -it cassandra-origin-1 \
-  aws s3 ls --recursive --summarize --human-readable $MIGRATION_DIR
+  /google-cloud-sdk/bin/gsutil ls -r ${MIGRATION_DIR}
 ```
 
 When the upload is complete, execute the following to clear the snapshots on the origin database:

@@ -37,6 +37,9 @@ tasks:
       docker exec cassandra-origin-1 bash -c "
         apt-get update -y && apt-get install -y wget tar && wget -O azcopy.tar.gz https://aka.ms/downloadazcopy-v10-linux && tar -xvf azcopy.tar.gz && mv azcopy_linux_amd64_*/azcopy /usr/local/bin/ && rm -rf azcopy.tar.gz azcopy_linux_amd64_* && azcopy --version
       "
+      docker exec cassandra-origin-1 bash -c "
+        cd / && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz && tar -xf google-cloud-cli-linux-x86_64.tar.gz && echo 'export PATH=\$PATH:/google-cloud-sdk/bin' >> /root/.bashrc
+      "
 
       source /home/gitpod/.astra/cli/astra-init.sh
 ports:

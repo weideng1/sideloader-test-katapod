@@ -11,7 +11,7 @@
  <a title="Back" href='command:katapod.loadPage?[{"step":"step2"}]' 
    class="btn btn-dark navigation-top-left">⬅️ Back
  </a>
-<span class="step-count">Step 3 (AWS)</span>
+<span class="step-count">Step 3 (Azure)</span>
  <a title="Next" href='command:katapod.loadPage?[{"step":"step4"}]' 
     class="btn btn-dark navigation-top-right">Next ➡️
   </a>
@@ -105,9 +105,7 @@ curl -s -X GET \
     https://api.astra.datastax.com/v2/databases/${ASTRA_DB_ID}/migrations/${MIGRATION_ID} \
     | jq . > init_complete_output.json
 export MIGRATION_DIR=$(jq '.uploadBucketDir' init_complete_output.json | tr -d '"')
-export ACCESS_KEY_ID=$(jq '.uploadCredentials.keys.accessKeyID' init_complete_output.json | tr -d '"')
-export SECRET_ACCESS_KEY=$(jq '.uploadCredentials.keys.secretAccessKey' init_complete_output.json | tr -d '"')
-export SESSION_TOKEN=$(jq '.uploadCredentials.keys.sessionToken' init_complete_output.json | tr -d '"')
+export AZURE_SAS_TOKEN=$(jq '.uploadCredentials.keys.url' init_complete_output.json | tr -d '"' | sed 's/^[^?]*?//')
 rm -f init_complete_output.json
 ```
 
@@ -117,24 +115,24 @@ Run the following command:
 ```bash
 ### {"terminalId": "host", "backgroundColor": "#C5DDD2"}
 docker exec \
-  -e AWS_ACCESS_KEY_ID=$ACCESS_KEY_ID \
-  -e AWS_SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY \
-  -e AWS_SESSION_TOKEN=$SESSION_TOKEN \
-  -e MIGRATION_DIR=$MIGRATION_DIR \
-  -it cassandra-origin-1 \
-  aws s3 sync --only-show-errors --exclude '*' --include '*/snapshots/data_migration_snapshot*' /var/lib/cassandra/data/ ${MIGRATION_DIR}node1
+  -e MIGRATION_DIR \
+  -e AZURE_SAS_TOKEN \
+  -it cassandra-origin-1 bash -c '
+    for dir in $(find /var/lib/cassandra/data/ -type d -path "*/snapshots/data_migration_snapshot*"); do
+      REL_PATH=${dir#"/var/lib/cassandra/data/"}  # Remove the base path
+      azcopy sync "$dir" "${MIGRATION_DIR}node1/$REL_PATH/"?${AZURE_SAS_TOKEN} --recursive
+    done
+  '
 ```
 
 Check that the data has been uploaded correctly to the migration directory:
 ```bash
 ### {"terminalId": "host", "backgroundColor": "#C5DDD2"}
 docker exec \
-  -e AWS_ACCESS_KEY_ID=$ACCESS_KEY_ID \
-  -e AWS_SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY \
-  -e AWS_SESSION_TOKEN=$SESSION_TOKEN \
-  -e MIGRATION_DIR=$MIGRATION_DIR \
+  -e MIGRATION_DIR \
+  -e AZURE_SAS_TOKEN \
   -it cassandra-origin-1 \
-  aws s3 ls --recursive --summarize --human-readable $MIGRATION_DIR
+  azcopy list ${MIGRATION_DIR}?${AZURE_SAS_TOKEN}
 ```
 
 When the upload is complete, execute the following to clear the snapshots on the origin database:
