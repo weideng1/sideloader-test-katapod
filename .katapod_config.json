@@ -12,7 +12,7 @@
       "intro": {
         "host": [
           {
-            "command": "/workspace/sideloader-test-katapod/scenario_scripts/finalize_origin.sh && /workspace/sideloader-test-katapod/scenario_scripts/setup_astradb_target.sh"
+            "command": "git pull -q && /workspace/sideloader-test-katapod/scenario_scripts/finalize_origin.sh && /workspace/sideloader-test-katapod/scenario_scripts/setup_astradb_target.sh"
           }
         ]
       }
