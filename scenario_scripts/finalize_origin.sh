@@ -4,6 +4,8 @@ clear ;
 
 ./scenario_scripts/welcome.sh ;
 
+docker start cassandra-origin-1 ;
+
 ./scenario_scripts/wait_for_cassandra.sh ;
 
 ./scenario_scripts/provision_origin.sh ;
