@@ -21,8 +21,6 @@
 
 <div class="step-title">Preliminary step: set up Target</div>
 
-![Phase 0b](images/p0b.png)
-
 #### _🎯 Goal: Setup the Target database (Astra DB instance) and verifying it is ready for the migration._
 
 **Note**: you are going to make use of the `astra-cli` [utility](https://docs.datastax.com/en/astra-classic/docs/astra-cli/introduction.html)
