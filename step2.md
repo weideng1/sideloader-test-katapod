@@ -69,7 +69,7 @@ and then execute it on the Astra DB instance:
 ```bash
 ### host
 cd /workspace/sideloader-test-katapod/
-astra db cqlsh sstslprod_aws -e "DROP TABLE zdmapp.user_status"
+astra db cqlsh sstslprod_aws -e "DROP TABLE IF EXISTS zdmapp.user_status"
 astra db cqlsh sstslprod_aws -f astradb_config/astradb_schema.cql
 astra db cqlsh sstslprod_aws -e "SELECT * FROM zdmapp.user_status"
 ```
