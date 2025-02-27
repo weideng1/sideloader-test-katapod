@@ -1,10 +1,10 @@
 #!/bin/bash
 
-rm -f ~/.astrarc
-
 while true; do
   read -p "Enter your Astra DB env (dev, test, prod): " ASTRA_DB_ENV
   read -p "Enter your Astra DB token: " ASTRA_DB_TOKEN
+
+  rm -f ~/.astrarc
 
   if astra setup --env="${ASTRA_DB_ENV^^}" --token "$ASTRA_DB_TOKEN"; then
     echo "Astra-CLI setup successful!"
