@@ -154,7 +154,7 @@ curl -s -X POST \
 
 This API returns immediately after launching a long-running background process that imports your snapshot into Target.
 
-You can monitor the process through the same status API call as above:
+You can monitor the process through the same status API call as below:
 ```bash
 ### {"terminalId": "host", "backgroundColor": "#C5DDD2"}
 curl -s -X GET \
