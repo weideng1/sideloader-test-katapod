@@ -2,13 +2,19 @@
 
 while true; do
   read -p "Enter your Astra DB env (dev, test, prod): " ASTRA_DB_ENV
+  ASTRA_DB_ENV_LOWER=$(echo "$ASTRA_DB_ENV" | tr '[:upper:]' '[:lower:]')
+
+  if [[ ! "$ASTRA_DB_ENV_LOWER" =~ ^(dev|test|prod)$ ]]; then
+    echo "Invalid env: must be one of dev, test, or prod."
+    continue
+  fi
+
   read -s -p "Enter your Astra DB token (leave blank to use existing config): " ASTRA_DB_TOKEN
   echo
 
   if [[ -z "$ASTRA_DB_TOKEN" ]]; then
     echo "No token entered — trying to use existing ~/.astrarc..."
 
-    # Optional: validate existing config
     if astra db list > /dev/null 2>&1; then
       echo "Existing Astra CLI config looks valid."
       break
