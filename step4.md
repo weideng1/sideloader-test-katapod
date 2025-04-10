@@ -64,6 +64,8 @@ rm -f $HOME/.astra/scb/scb_*.zip
 rm -f $HOME/.bash_history
 touch $HOME/.bash_history
 rm -f $HOME/.viminfo
+cd $HOME/sideloader-test-katapod
+git restore .
 ```
 
 Now, **optionally** if you want to be able to go back to step 0 and run through everything all over again, you should execute the following steps to
