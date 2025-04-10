@@ -12,7 +12,7 @@
       "intro": {
         "host": [
           {
-            "command": git stash && "git pull -q --rebase && /workspace/sideloader-test-katapod/scenario_scripts/finalize_origin.sh && /workspace/sideloader-test-katapod/scenario_scripts/setup_astradb_target.sh"
+            "command": "git stash && git pull -q --rebase && /workspace/sideloader-test-katapod/scenario_scripts/finalize_origin.sh && /workspace/sideloader-test-katapod/scenario_scripts/setup_astradb_target.sh"
           }
         ]
       }
