@@ -2,7 +2,21 @@
 
 while true; do
   read -p "Enter your Astra DB env (dev, test, prod): " ASTRA_DB_ENV
-  read -p "Enter your Astra DB token: " ASTRA_DB_TOKEN
+  read -s -p "Enter your Astra DB token (leave blank to use existing config): " ASTRA_DB_TOKEN
+  echo
+
+  if [[ -z "$ASTRA_DB_TOKEN" ]]; then
+    echo "No token entered — trying to use existing ~/.astrarc..."
+
+    # Optional: validate existing config
+    if astra db list > /dev/null 2>&1; then
+      echo "Existing Astra CLI config looks valid."
+      break
+    else
+      echo "Existing config is invalid or expired. Please enter a valid token."
+      continue
+    fi
+  fi
 
   rm -f ~/.astrarc
 
